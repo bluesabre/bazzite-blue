@@ -25,3 +25,6 @@ systemctl enable podman.socket
 
 # Install Vivaldi
 /ctx/scripts/install-vivaldi.sh
+
+# Connect 1Password and Vivaldi
+/ctx/scripts/configure-1password.sh
