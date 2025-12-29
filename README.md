@@ -262,3 +262,14 @@ These are images derived from this template (or similar enough to this template)
 - [Homer](https://github.com/bketelsen/homer/)
 - [Amy OS](https://github.com/astrovm/amyos)
 - [VeneOS](https://github.com/Venefilyn/veneos)
+
+## Usage Notes
+
+During installation, the requisite 1Password groups may not be created. In this case, create them yourself:
+
+```bash
+GID_ONEPASSWORD="1790"
+GID_ONEPASSWORDCLI="1791"
+groupadd -g ${GID_ONEPASSWORD} onepassword
+groupadd -g ${GID_ONEPASSWORDCLI} onepassword-cli
+```

@@ -74,5 +74,14 @@ EOF
 # No further hack SHOULD be needed since dnf5 does run the script
 # after-install.sh as expected and uses our pre-set groups.
 
+# Enable connection with Vivaldi browser
+mkdir -p /etc/1password/
+
+cat <<EOF >/etc/1password/custom_allowed_browsers
+vivaldi-bin
+EOF
+
+chmod 644 /etc/1password/custom_allowed_browsers
+
 # Disable the yum repo (updates are baked into new images)
 sed -i "s@enabled=1@enabled=0@" /etc/yum.repos.d/1password.repo
