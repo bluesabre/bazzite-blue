@@ -18,10 +18,6 @@ echo "Installing 1Password"
 # symbolic link /opt/1Password => /usr/lib/1Password upon
 # boot.
 
-# Prepare staging directory
-mkdir -p /var/opt # -p just in case it exists
-# for some reason...
-
 # Setup repo
 cat <<EOF >/etc/yum.repos.d/1password.repo
 [1password]
@@ -61,18 +57,6 @@ groupadd -g ${GID_ONEPASSWORDCLI} onepassword-cli
 
 # Now let's install the packages.
 dnf5 install -y 1password 1password-cli
-
-# This places the 1Password contents in an image safe location
-mv /var/opt/1Password /usr/lib/1Password # move this over here
-
-# Register path symlink
-# We do this via tmpfiles.d so that it is created by the live system.
-cat >/usr/lib/tmpfiles.d/onepassword.conf <<EOF
-L  /opt/1Password  -  -  -  -  /usr/lib/1Password
-EOF
-
-# No further hack SHOULD be needed since dnf5 does run the script
-# after-install.sh as expected and uses our pre-set groups.
 
 # Disable the yum repo (updates are baked into new images)
 sed -i "s@enabled=1@enabled=0@" /etc/yum.repos.d/1password.repo
