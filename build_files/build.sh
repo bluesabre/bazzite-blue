@@ -28,6 +28,3 @@ systemctl enable podman.socket
 
 # Install virt-manager
 /ctx/scripts/install-virt-manager.sh
-
-# Connect 1Password and Vivaldi
-/ctx/scripts/configure-1password.sh
