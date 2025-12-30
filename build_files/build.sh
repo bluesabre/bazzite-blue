@@ -20,6 +20,9 @@ set -ouex pipefail
 
 systemctl enable podman.socket
 
+# Install Fonts
+/ctx/scripts/install-fonts.sh
+
 # Install 1password
 /ctx/scripts/install-1password.sh
 
