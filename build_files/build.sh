@@ -28,3 +28,6 @@ systemctl enable podman.socket
 
 # Install virt-manager
 /ctx/scripts/install-virt-manager.sh
+
+# Install code
+/ctx/scripts/install-vscode.sh
