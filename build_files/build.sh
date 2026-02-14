@@ -35,5 +35,8 @@ systemctl enable podman.socket
 # Install code
 /ctx/scripts/install-vscode.sh
 
+# Install Insync
+/ctx/scripts/install-insync.sh
+
 # Install utilities
 /ctx/scripts/install-utilities.sh

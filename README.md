@@ -14,6 +14,7 @@ This image is built atop the _Bazzite Nvidia_ (`ghcr.io/ublue-os/bazzite-nvidia:
 | Package | File | Credits |
 |---------|------|---------|
 | 1Password (`1password`) _with Vivaldi support_ | [install-1password.sh](/build_files/scripts/install-1password.sh) | [benhoman/ublue](https://github.com/benhoman/ublue/blob/9f079aa2ece3223f16aef8e6a635c73111323ab4/build_files/scripts/install-1password.sh) |
+| Insync (`insync`) | [install-insync.sh](/build_files/scripts/install-insync.sh) | [ebits21/insync-distrobox](https://github.com/ebits21/insync-distrobox/blob/main/make-insync-container.sh) |
 | Inter Font Family (`rsms-inter-fonts`) | [install-fonts.sh](/build_files/scripts/install-fonts.sh) | _N/A_ |
 | Optipng (`optipng`) | [install-utilities.sh](/build_files/scripts/install-utilities.sh) | _N/A_ |
 | Microsoft TypeType Core Fonts (`msttcore-fonts`) | [install-fonts.sh](/build_files/scripts/install-fonts.sh) | [kohega/bazzite-khg](https://github.com/kohega/bazzite-khg/blob/500f54715384a66a4c6756a1bc4a8160c82c6c37/build_files/install_packages.sh) |
