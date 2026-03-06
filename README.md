@@ -7,7 +7,7 @@ Based on the [ublue-os/image-template](https://github.com/ublue-os/image-templat
 
 ## Image Definition
 
-This image is built atop the _Bazzite Nvidia_ (`ghcr.io/ublue-os/bazzite-nvidia:stable`) image. It uses the Nvidia proprietary drivers to support the Nvidia GTX 1080 graphics card, among many others.
+This image is built atop the _Bazzite GNOME Nvidia_ (`ghcr.io/ublue-os/bazzite-gnome-nvidia:stable`) image. It uses the Nvidia proprietary drivers to support the Nvidia GTX 1080 graphics card, among many others.
 
 ### Added to Bazzite
 
@@ -22,7 +22,6 @@ This image is built atop the _Bazzite Nvidia_ (`ghcr.io/ublue-os/bazzite-nvidia:
 | Virtual Machine Manager (`virt-manager`) | [install-virt-manager.sh](/build_files/scripts/install-virt-manager.sh) | [butterflysky/butterfly-ublue](https://github.com/butterflysky/butterfly-ublue/blob/c5f0adaa8fac85fbd0e0f8d53812697c047ffb14/build_files/install-addon-packages.sh) |
 | Vivaldi Browser (`vivaldi-stable`) | [install-vivaldi.sh](/build_files/scripts/install-vivaldi.sh) | _N/A_ |
 | Visual Studio Code (`code`) | [install-vscode.sh](/build_files/scripts/install-vscode.sh) | [ublue-os/bluefin](https://github.com/ublue-os/bluefin/blob/10d0ea03a94abff0d736fd3a320e61a9edc7833f/build_files/dx/00-dx.sh) |
-| Yakuake (`yakuake`) | [install-utilities.sh](/build_files/scripts/install-utilities.sh) | _N/A_ |
 
 
 ## Switch to This Image
