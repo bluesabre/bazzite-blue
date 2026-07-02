@@ -4,5 +4,4 @@ set ${SET_X:+-x} -eou pipefail
 
 echo "Installing Utilities"
 
-dnf5 install -y optipng \
-    yakuake
+dnf5 install -y optipng
