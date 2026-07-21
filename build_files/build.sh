@@ -24,7 +24,7 @@ systemctl enable podman.socket
 /ctx/scripts/install-fonts.sh
 
 # Install 1password
-# /ctx/scripts/install-1password.sh
+/ctx/scripts/install-1password.sh
 
 # Install Brave
 /ctx/scripts/install-brave.sh
