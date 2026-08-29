@@ -24,22 +24,23 @@ systemctl enable podman.socket
 /ctx/scripts/install-fonts.sh
 
 # Install 1password
-/ctx/scripts/install-1password-edge.sh
+/ctx/scripts/install-1password.sh
+# /ctx/scripts/install-1password-edge.sh
 
 # Install Brave
 /ctx/scripts/install-brave.sh
 
 # Install Vivaldi
-/ctx/scripts/install-vivaldi.sh
+# /ctx/scripts/install-vivaldi.sh
 
 # Install virt-manager
-/ctx/scripts/install-virt-manager.sh
+# /ctx/scripts/install-virt-manager.sh
 
 # Install code
 /ctx/scripts/install-vscode.sh
 
 # Install Insync
-/ctx/scripts/install-insync.sh
+# /ctx/scripts/install-insync.sh
 
 # Install utilities
 /ctx/scripts/install-utilities.sh
