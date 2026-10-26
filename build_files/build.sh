@@ -34,7 +34,7 @@ systemctl enable podman.socket
 # /ctx/scripts/install-vivaldi.sh
 
 # Install virt-manager
-# /ctx/scripts/install-virt-manager.sh
+/ctx/scripts/install-virt-manager.sh
 
 # Install code
 /ctx/scripts/install-vscode.sh
