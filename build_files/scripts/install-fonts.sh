@@ -4,7 +4,7 @@ set ${SET_X:+-x} -eou pipefail
 
 echo "Installing Fonts"
 
-dnf5 install -y mscore-fonts-all \
+dnf5 install -y \
     xorg-x11-font-utils \
     cabextract \
     fontconfig \
