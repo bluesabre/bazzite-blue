@@ -28,7 +28,7 @@ systemctl enable podman.socket
 # /ctx/scripts/install-1password-edge.sh
 
 # Install Brave
-/ctx/scripts/install-brave.sh
+# /ctx/scripts/install-brave.sh
 
 # Install Vivaldi
 # /ctx/scripts/install-vivaldi.sh
