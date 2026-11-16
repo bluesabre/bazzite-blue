@@ -1,0 +1,51 @@
+---
+name: Clean up PR image
+on:
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  packages: write
+
+jobs:
+  cleanup:
+    name: Delete pr-<N> image tag
+    # Only same-repo PRs publish a pr-<N> image (see build.yml).
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Delete pr-<N> package version and its signature
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const prTag = `pr-${context.payload.pull_request.number}`;
+            const owner = context.repo.owner;
+            const isOrg = context.payload.repository.owner.type === 'Organization';
+            const params = { package_type: 'container', package_name: context.repo.repo.toLowerCase() };
+            const list = isOrg
+              ? github.paginate(github.rest.packages.getAllPackageVersionsForPackageOwnedByOrg, { ...params, org: owner, per_page: 100 })
+              : github.paginate(github.rest.packages.getAllPackageVersionsForPackageOwnedByUser, { ...params, username: owner, per_page: 100 });
+            const remove = (id) => isOrg
+              ? github.rest.packages.deletePackageVersionForOrg({ ...params, org: owner, package_version_id: id })
+              : github.rest.packages.deletePackageVersionForUser({ ...params, username: owner, package_version_id: id });
+
+            const versions = await list;
+            const tagsOf = (v) => v.metadata?.container?.tags ?? [];
+            const target = versions.find((v) => tagsOf(v).includes(prTag));
+            if (!target) {
+              core.info(`No package version tagged ${prTag}; nothing to do.`);
+              return;
+            }
+            // Never delete an image that is also published under a non-PR tag.
+            const others = tagsOf(target).filter((t) => !/^pr-\d+$/.test(t));
+            if (others.length > 0) {
+              core.warning(`${prTag} is also tagged ${others.join(', ')}; leaving it alone.`);
+              return;
+            }
+            const sigTag = `${target.name.replace(':', '-')}.sig`;  // cosign: sha256-<hex>.sig
+            for (const v of versions.filter((v) => v.id === target.id || tagsOf(v).includes(sigTag))) {
+              core.info(`Deleting version ${v.id} (${tagsOf(v).join(', ') || v.name})`);
+              await remove(v.id);
+            }

@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Credit to: https://github.com/benhoman/ublue/blob/9f079aa2ece3223f16aef8e6a635c73111323ab4/build_files/scripts/install-1password.sh
 # The file below is benhoman's credit.
@@ -6,9 +6,28 @@
 # Thanks to bri for the inspiration! My script is mostly based on this example:
 # https://github.com/briorg/bluefin/blob/c62c30a04d42fd959ea770722c6b51216b4ec45b/scripts/1password.sh
 
+# Usage: install-1password.sh [stable|edge]
+
 set ${SET_X:+-x} -eou pipefail
 
-echo "Installing 1Password"
+CHANNEL="${1:-stable}"
+case "$CHANNEL" in
+stable)
+    REPO_ID="1password"
+    REPO_NAME="1Password Stable Channel"
+    ;;
+edge)
+    REPO_ID="1password-edge"
+    REPO_NAME="1Password Edge Channel"
+    ;;
+*)
+    echo "Unknown 1Password channel: $CHANNEL (expected stable or edge)" >&2
+    exit 1
+    ;;
+esac
+REPO_FILE="/etc/yum.repos.d/${REPO_ID}.repo"
+
+echo "Installing 1Password (${CHANNEL})"
 
 # On libostree systems, /opt is a symlink to /var/opt,
 # which actually only exists on the live system. /var is
@@ -19,14 +38,13 @@ echo "Installing 1Password"
 # boot.
 
 # Prepare staging directory
-mkdir -p /var/opt # -p just in case it exists
-# for some reason...
+mkdir -p /var/opt
 
 # Setup repo
-cat <<EOF >/etc/yum.repos.d/1password.repo
-[1password]
-name=1Password Stable Channel
-baseurl=https://downloads.1password.com/linux/rpm/stable/\$basearch
+cat <<EOF >"$REPO_FILE"
+[${REPO_ID}]
+name=${REPO_NAME}
+baseurl=https://downloads.1password.com/linux/rpm/${CHANNEL}/\$basearch
 enabled=1
 gpgcheck=1
 repo_gpgcheck=1
@@ -37,42 +55,37 @@ EOF
 rpm --import https://downloads.1password.com/linux/keys/1password.asc
 
 # Prepare 1Password groups
-# Normally, when after dnf installs the 1password RPM, an
-# 'after-install.sh' script runs to cofigure several things, including
-# the creation of a group. Under rpm-ostree, this didn't work quite as
-# expected, thus several steps were done to hack around and fix things.
-# Now with dnf5, there is a problem where 'after-install.sh' creates
-# groups which conflict with default user's GID. This now pre-creates
-# the groups, rather than fixing after RPM installation.
-
-# I hardcode GIDs and cross fingers that nothing else steps on them.
-# These numbers _should_ be okay under normal use, but
-# if there's a more specific range that I should use here
-# please submit a PR!
-
-# Specifically, GID must be > 1000, and absolutely must not
-# conflict with any real groups on the deployed system.
-# Normal user group GIDs on Fedora are sequential starting
-# at 1000, so let's skip ahead and set to something higher.
+# The RPM's after-install.sh creates groups that can conflict with the
+# default user's GID, so pre-create them with fixed GIDs (> 1000, well
+# clear of the sequential user GIDs Fedora hands out from 1000).
 GID_ONEPASSWORD="1790"
 GID_ONEPASSWORDCLI="1791"
-groupadd -g ${GID_ONEPASSWORD} onepassword
-groupadd -g ${GID_ONEPASSWORDCLI} onepassword-cli
+GID_ONEPASSWORDMCP="1792" # setgid group for the 1password-mcp server binary
+groupadd -g "${GID_ONEPASSWORD}" onepassword
+groupadd -g "${GID_ONEPASSWORDCLI}" onepassword-cli
+groupadd -g "${GID_ONEPASSWORDMCP}" onepassword-mcp
+
+# The groupadd above only lands in this image's /etc/group, which is not
+# merged into systems that are already deployed. Ship a sysusers.d entry so
+# systemd-sysusers creates the same groups (same GIDs as the setgid files
+# below) on every boot where they are missing.
+cat >/usr/lib/sysusers.d/onepassword.conf <<EOF
+g onepassword     ${GID_ONEPASSWORD}
+g onepassword-cli ${GID_ONEPASSWORDCLI}
+g onepassword-mcp ${GID_ONEPASSWORDMCP}
+EOF
 
 # Now let's install the packages.
 dnf5 install -y 1password 1password-cli
 
 # This places the 1Password contents in an image safe location
-mv /var/opt/1Password /usr/lib/1Password # move this over here
+mv /var/opt/1Password /usr/lib/1Password
 
 # Register path symlink
 # We do this via tmpfiles.d so that it is created by the live system.
 cat >/usr/lib/tmpfiles.d/onepassword.conf <<EOF
 L  /opt/1Password  -  -  -  -  /usr/lib/1Password
 EOF
-
-# No further hack SHOULD be needed since dnf5 does run the script
-# after-install.sh as expected and uses our pre-set groups.
 
 # Enable connection with Vivaldi browser
 mkdir -p /etc/1password/
@@ -84,4 +97,4 @@ EOF
 chmod 644 /etc/1password/custom_allowed_browsers
 
 # Disable the yum repo (updates are baked into new images)
-sed -i "s@enabled=1@enabled=0@" /etc/yum.repos.d/1password.repo
+sed -i "s@enabled=1@enabled=0@" "$REPO_FILE"

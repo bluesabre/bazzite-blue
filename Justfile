@@ -100,6 +100,39 @@ build $target_image=image_name $tag=default_tag:
         --tag "${target_image}:${tag}" \
         .
 
+# Rechunk an already-built image into many reproducible layers for smaller
+# delta updates (same approach as ublue-os/image-template).
+[group('Build')]
+ostree-rechunk $target_image=image_name $tag=default_tag:
+    #!/usr/bin/env bash
+    set -xeuo pipefail
+
+    # Use the already-built local image to avoid pulling from a remote registry
+    RPM_OSTREE_CHUNKER_IMAGE="localhost/${target_image}:${tag}"
+
+    GRAPHROOT="$(podman info --format '{{ '{{.Store.GraphRoot}}' }}')"
+
+    # build-chunked-oci starts from the rootfs and drops the image's labels,
+    # so carry them over (minus the ostree ones it generates itself).
+    LABEL_ARGS=()
+    while IFS= read -r kv; do
+        LABEL_ARGS+=(--label "${kv}")
+    done < <(podman inspect "${RPM_OSTREE_CHUNKER_IMAGE}" | jq -r '.[0].Labels // {} | to_entries[] | select(.key | test("^ostree\\.(commit|final-diffid)$") | not) | "\(.key)=\(.value)"')
+
+    podman run --rm --pull=never --privileged \
+      --mount=type=image,src="${target_image}:${tag}",target=/rpm-ostree \
+      --mount=type=bind,src=${GRAPHROOT},target=/run/host-container-storage,rw \
+      --mount=type=tmpfs,target=/run/rpm-ostree-storage \
+      --entrypoint /usr/bin/rpm-ostree \
+      "${RPM_OSTREE_CHUNKER_IMAGE}" \
+      compose build-chunked-oci \
+      --max-layers 127 \
+      --format-version=2 \
+      --bootc \
+      --rootfs /rpm-ostree \
+      "${LABEL_ARGS[@]}" \
+      --output "containers-storage:[overlay@/run/host-container-storage+/run/rpm-ostree-storage]localhost/${target_image}:${tag}"
+
 # Command: _rootful_load_image
 # Description: This script checks if the current user is root or running under sudo. If not, it attempts to resolve the image tag using podman inspect.
 #              If the image is found, it loads it into rootful podman. If the image is not found, it pulls it from the repository.
@@ -293,18 +326,17 @@ spawn-vm rebuild="0" type="qcow2" ram="6G":
       --vsock=false --pass-ssh-key=false \
       -i ./output/**/*.{{ type }}
 
-
 # Runs shell check on all Bash scripts
 lint:
     #!/usr/bin/env bash
     set -eoux pipefail
-    # Check if shellcheck is installed
-    if ! command -v shellcheck &> /dev/null; then
-        echo "shellcheck could not be found. Please install it."
-        exit 1
+    mapfile -t scripts < <(/usr/bin/find build_files -iname "*.sh" -type f)
+    if command -v shellcheck &> /dev/null; then
+        shellcheck -x "${scripts[@]}"
+    else
+        # Immutable hosts usually lack shellcheck; run it in a container instead.
+        podman run --rm -v "${PWD}:/mnt:ro,Z" -w /mnt docker.io/koalaman/shellcheck:stable -x "${scripts[@]}"
     fi
-    # Run shellcheck on all Bash scripts
-    /usr/bin/find . -iname "*.sh" -type f -exec shellcheck "{}" ';'
 
 # Runs shfmt on all Bash scripts
 format:

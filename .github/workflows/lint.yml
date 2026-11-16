@@ -1,0 +1,33 @@
+---
+name: Lint
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint scripts and Justfile
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install just
+        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
+
+      - name: Check Justfile syntax
+        run: just check
+
+      - name: ShellCheck
+        run: |
+          mapfile -t scripts < <(find build_files -iname '*.sh' -type f)
+          shellcheck -x "${scripts[@]}"

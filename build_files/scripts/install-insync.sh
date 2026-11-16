@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 set ${SET_X:+-x} -eou pipefail
 
@@ -8,7 +8,7 @@ echo "Installing Insync (Fedora 43)"
 cat <<EOF >/etc/yum.repos.d/insync.repo
 [insync]
 name=insync repo
-baseurl=http://yum.insync.io/fedora/43/
+baseurl=https://yum.insync.io/fedora/43/
 gpgcheck=1
 gpgkey=https://d2t3ff60b2tol4.cloudfront.net/repomd.xml.key
 enabled=1

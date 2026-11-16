@@ -1,5 +1,8 @@
 # Bazzite Blue
 
+[![Build container image](https://github.com/bluesabre/bazzite-blue/actions/workflows/build.yml/badge.svg)](https://github.com/bluesabre/bazzite-blue/actions/workflows/build.yml)
+[![Lint](https://github.com/bluesabre/bazzite-blue/actions/workflows/lint.yml/badge.svg)](https://github.com/bluesabre/bazzite-blue/actions/workflows/lint.yml)
+
 Bazzite with some [bluesabre](https://github.com/bluesabre)-flavored tweaks. \
 _The name is a work-in-progress._
 
@@ -9,181 +12,84 @@ Based on the [ublue-os/image-template](https://github.com/ublue-os/image-templat
 
 This image is built atop the _Bazzite Nvidia_ (`ghcr.io/ublue-os/bazzite-nvidia:stable`) image. It uses the Nvidia proprietary drivers to support the Nvidia GTX 1080 graphics card, among many others.
 
+The image is rebuilt daily, so it picks up upstream Bazzite updates automatically.
+
 ### Added to Bazzite
 
 | Package | File | Credits |
 |---------|------|---------|
-| 1Password (`1password`) _with Vivaldi support_ | [install-1password.sh](/build_files/scripts/install-1password.sh) | [benhoman/ublue](https://github.com/benhoman/ublue/blob/9f079aa2ece3223f16aef8e6a635c73111323ab4/build_files/scripts/install-1password.sh) |
+| 1Password (`1password`, `1password-cli`) _with Vivaldi support_ | [install-1password.sh](/build_files/scripts/install-1password.sh) | [benhoman/ublue](https://github.com/benhoman/ublue/blob/9f079aa2ece3223f16aef8e6a635c73111323ab4/build_files/scripts/install-1password.sh) |
+| Inter Font Family (`rsms-inter-fonts`) | [install-fonts.sh](/build_files/scripts/install-fonts.sh) | _N/A_ |
+| Microsoft TrueType Core Fonts (`msttcore-fonts`) | [install-fonts.sh](/build_files/scripts/install-fonts.sh) | [kohega/bazzite-khg](https://github.com/kohega/bazzite-khg/blob/500f54715384a66a4c6756a1bc4a8160c82c6c37/build_files/install_packages.sh) |
+| Ubuntu Font Family (`fonts-ubuntu`) | [install-fonts.sh](/build_files/scripts/install-fonts.sh) | [rpassmore/my-ublue-os](https://github.com/rpassmore/my-ublue-os/blob/3fe0b5ce2a5a0b1d9c7565cbba2f8eacb9ab6551/build_files/build.sh) |
+| Virtual Machine Manager (`virt-manager`, libvirt/QEMU) | [install-virt-manager.sh](/build_files/scripts/install-virt-manager.sh) | [butterflysky/butterfly-ublue](https://github.com/butterflysky/butterfly-ublue/blob/c5f0adaa8fac85fbd0e0f8d53812697c047ffb14/build_files/install-addon-packages.sh) |
+| Visual Studio Code (`code`) | [install-vscode.sh](/build_files/scripts/install-vscode.sh) | [ublue-os/bluefin](https://github.com/ublue-os/bluefin/blob/10d0ea03a94abff0d736fd3a320e61a9edc7833f/build_files/dx/00-dx.sh) |
+| Optipng, flatpak-builder, Yakuake | [install-utilities.sh](/build_files/scripts/install-utilities.sh) | _N/A_ |
+| Signature verification policy for this image | [configure-signing.sh](/build_files/scripts/configure-signing.sh) | _N/A_ |
+| Stale-image desktop warning | [install-image-age-check.sh](/build_files/scripts/install-image-age-check.sh) | _N/A_ |
+
+### Optional (disabled in [build.sh](/build_files/build.sh))
+
+| Package | File | Credits |
+|---------|------|---------|
+| 1Password Edge channel | [install-1password.sh](/build_files/scripts/install-1password.sh) `edge` | see above |
 | Brave Browser (`brave-browser`) | [install-brave.sh](/build_files/scripts/install-brave.sh) | _N/A_ |
 | Insync (`insync`) | [install-insync.sh](/build_files/scripts/install-insync.sh) | [ebits21/insync-distrobox](https://github.com/ebits21/insync-distrobox/blob/main/make-insync-container.sh) |
-| Inter Font Family (`rsms-inter-fonts`) | [install-fonts.sh](/build_files/scripts/install-fonts.sh) | _N/A_ |
-| Optipng (`optipng`) | [install-utilities.sh](/build_files/scripts/install-utilities.sh) | _N/A_ |
-| Microsoft TypeType Core Fonts (`msttcore-fonts`) | [install-fonts.sh](/build_files/scripts/install-fonts.sh) | [kohega/bazzite-khg](https://github.com/kohega/bazzite-khg/blob/500f54715384a66a4c6756a1bc4a8160c82c6c37/build_files/install_packages.sh) |
-| Ubuntu Font Family (`ubuntu-family-fonts`) | [install-fonts.sh](/build_files/scripts/install-fonts.sh) | [rpassmore/my-ublue-os](https://github.com/rpassmore/my-ublue-os/blob/3fe0b5ce2a5a0b1d9c7565cbba2f8eacb9ab6551/build_files/build.sh) |
-| Virtual Machine Manager (`virt-manager`) | [install-virt-manager.sh](/build_files/scripts/install-virt-manager.sh) | [butterflysky/butterfly-ublue](https://github.com/butterflysky/butterfly-ublue/blob/c5f0adaa8fac85fbd0e0f8d53812697c047ffb14/build_files/install-addon-packages.sh) |
 | Vivaldi Browser (`vivaldi-stable`) | [install-vivaldi.sh](/build_files/scripts/install-vivaldi.sh) | _N/A_ |
-| Visual Studio Code (`code`) | [install-vscode.sh](/build_files/scripts/install-vscode.sh) | [ublue-os/bluefin](https://github.com/ublue-os/bluefin/blob/10d0ea03a94abff0d736fd3a320e61a9edc7833f/build_files/dx/00-dx.sh) |
-| Yakuake (`yakuake`) | [install-utilities.sh](/build_files/scripts/install-utilities.sh) | _N/A_ |
-
 
 ## Switch to This Image
 
 From your bootc system, run the following command:
 ```bash
-sudo bootc switch ghcr.io/bluesabre/bazzite-blue
+sudo bootc switch --enforce-container-sigpolicy ghcr.io/bluesabre/bazzite-blue
 ```
-This should queue your image for the next reboot, which you can do immediately after the command finishes.
+This queues the image for the next reboot. `--enforce-container-sigpolicy` makes bootc refuse images that aren't signed with this repo's [cosign key](./cosign.pub).
+
+If you're switching from stock Bazzite, your current system doesn't yet know this image's signing key, so the first switch may need to drop `--enforce-container-sigpolicy`. After you reboot into this image, the policy is installed and later updates are verified.
 
 ## Usage Notes
 
-During installation, the requisite 1Password groups may not be created. In this case, create them yourself:
+### Stale-image warning
+
+A per-user timer (`bazzite-blue-image-age.timer`) checks the booted image's build date once a day. If the image is more than 3 days old, which usually means the daily build is failing, it shows a desktop notification. To check by hand:
 
 ```bash
-GID_ONEPASSWORD="1790"
-GID_ONEPASSWORDCLI="1791"
-groupadd -g ${GID_ONEPASSWORD} onepassword
-groupadd -g ${GID_ONEPASSWORDCLI} onepassword-cli
+systemctl --user start bazzite-blue-image-age.service
+journalctl --user -u bazzite-blue-image-age.service -n 5
 ```
+
+When a scheduled build on `main` fails, CI also opens a GitHub issue labelled `build-failure`. The next successful build closes it.
+
+## Making Changes
+
+All changes go through pull requests:
+
+1. **Iterate locally**: `just build` builds the image with podman, and `just lint` runs ShellCheck (in a container if it isn't installed).
+2. **Open a PR** from a branch in this repository. CI builds the image and publishes it as `ghcr.io/bluesabre/bazzite-blue:pr-<N>`, signed and separate from `latest`.
+3. **Optionally boot it** to test on real hardware:
+   ```bash
+   sudo bootc switch --enforce-container-sigpolicy ghcr.io/bluesabre/bazzite-blue:pr-<N>
+   # reboot, test, then go back:
+   sudo bootc switch --enforce-container-sigpolicy ghcr.io/bluesabre/bazzite-blue:latest
+   ```
+4. **Merge** once the "Build and push image" and "Lint" checks are green. Closing the PR deletes its `pr-<N>` image.
+
+PRs from forks and from Dependabot are built but not published.
+
+### Recommended repository setting
+
+Under **Settings → Rules → Rulesets**, add a ruleset for `main` that requires a pull request and the status checks **Build and push image** and **Lint scripts and Justfile**. Add yourself to the bypass list for emergencies.
 
 # Repository Contents
 
-## Containerfile
+| Path | Purpose |
+|------|---------|
+| [Containerfile](./Containerfile) | Entry point: base image, runs `build.sh`, then `bootc container lint` |
+| [build_files/build.sh](./build_files/build.sh) | Calls each installer in `build_files/scripts/` |
+| [.github/workflows/build.yml](./.github/workflows/build.yml) | Daily/push/PR build, rechunk, push to GHCR, cosign signing, failure issues |
+| [.github/workflows/lint.yml](./.github/workflows/lint.yml) | ShellCheck and Justfile syntax |
+| [.github/workflows/cleanup-pr.yml](./.github/workflows/cleanup-pr.yml) | Deletes `pr-<N>` images when a PR closes |
+| [.github/workflows/build-disk.yml](./.github/workflows/build-disk.yml) | Builds qcow2/ISO disk images with bootc-image-builder |
+| [Justfile](./Justfile) | Local build, rechunk, VM, and lint recipes (`just --list`) |
 
-The [Containerfile](./Containerfile) defines the operations used to customize the selected image. This file is the entrypoint for your image build, and works exactly like a regular podman Containerfile. For reference, please see the [Podman Documentation](https://docs.podman.io/en/latest/Introduction.html).
-
-## build.sh
-
-The [build.sh](./build_files/build.sh) file is called from your Containerfile. It is the best place to install new packages or make any other customization to your system. There are customization examples contained within it for your perusal.
-
-## build.yml
-
-The [build.yml](./.github/workflows/build.yml) Github Actions workflow creates your custom OCI image and publishes it to the Github Container Registry (GHCR). By default, the image name will match the Github repository name. There are several environment variables at the start of the workflow which may be of interest to change.
-
-# Building Disk Images
-
-This template provides an out of the box workflow for creating disk images (ISO, qcow, raw) for your custom OCI image which can be used to directly install onto your machines.
-
-This template provides a way to upload the disk images that is generated from the workflow to a S3 bucket. The disk images will also be available as an artifact from the job, if you wish to use an alternate provider. To upload to S3 we use [rclone](https://rclone.org/) which is able to use [many S3 providers](https://rclone.org/s3/).
-
-## Setting Up ISO Builds
-
-The [build-disk.yml](./.github/workflows/build-disk.yml) Github Actions workflow creates a disk image from your OCI image by utilizing the [bootc-image-builder](https://osbuild.org/docs/bootc/). In order to use this workflow you must complete the following steps:
-
-1. Modify `disk_config/iso.toml` to point to your custom container image before generating an ISO image.
-2. If you changed your image name from the default in `build.yml` then in the `build-disk.yml` file edit the `IMAGE_REGISTRY`, `IMAGE_NAME` and `DEFAULT_TAG` environment variables with the correct values. If you did not make changes, skip this step.
-3. Finally, if you want to upload your disk images to S3 then you will need to add your S3 configuration to the repository's Action secrets. This can be found by going to your repository settings, under `Secrets and Variables` -> `Actions`. You will need to add the following
-  - `S3_PROVIDER` - Must match one of the values from the [supported list](https://rclone.org/s3/)
-  - `S3_BUCKET_NAME` - Your unique bucket name
-  - `S3_ACCESS_KEY_ID` - It is recommended that you make a separate key just for this workflow
-  - `S3_SECRET_ACCESS_KEY` - See above.
-  - `S3_REGION` - The region your bucket lives in. If you do not know then set this value to `auto`.
-  - `S3_ENDPOINT` - This value will be specific to the bucket as well.
-
-Once the workflow is done, you'll find the disk images either in your S3 bucket or as part of the summary under `Artifacts` after the workflow is completed.
-
-# Artifacthub
-
-This template comes with the necessary tooling to index your image on [artifacthub.io](https://artifacthub.io). Use the `artifacthub-repo.yml` file at the root to verify yourself as the publisher. This is important to you for a few reasons:
-
-- The value of artifacthub is it's one place for people to index their custom images, and since we depend on each other to learn, it helps grow the community. 
-- You get to see your pet project listed with the other cool projects in Cloud Native.
-- Since the site puts your README front and center, it's a good way to learn how to write a good README, learn some marketing, finding your audience, etc. 
-
-[Discussion Thread](https://universal-blue.discourse.group/t/listing-your-custom-image-on-artifacthub/6446)
-
-# Justfile Documentation
-
-The `Justfile` contains various commands and configurations for building and managing container images and virtual machine images using Podman and other utilities.
-To use it, you must have installed [just](https://just.systems/man/en/introduction.html) from your package manager or manually. It is available by default on all Universal Blue images.
-
-## Environment Variables
-
-- `image_name`: The name of the image (default: "image-template").
-- `default_tag`: The default tag for the image (default: "latest").
-- `bib_image`: The Bootc Image Builder (BIB) image (default: "quay.io/centos-bootc/bootc-image-builder:latest").
-
-## Building The Image
-
-### `just build`
-
-Builds a container image using Podman.
-
-```bash
-just build $target_image $tag
-```
-
-Arguments:
-- `$target_image`: The tag you want to apply to the image (default: `$image_name`).
-- `$tag`: The tag for the image (default: `$default_tag`).
-
-## Building and Running Virtual Machines and ISOs
-
-The below commands all build QCOW2 images. To produce or use a different type of image, substitute in the command with that type in the place of `qcow2`. The available types are `qcow2`, `iso`, and `raw`.
-
-### `just build-qcow2`
-
-Builds a QCOW2 virtual machine image.
-
-```bash
-just build-qcow2 $target_image $tag
-```
-
-### `just rebuild-qcow2`
-
-Rebuilds a QCOW2 virtual machine image.
-
-```bash
-just rebuild-vm $target_image $tag
-```
-
-### `just run-vm-qcow2`
-
-Runs a virtual machine from a QCOW2 image.
-
-```bash
-just run-vm-qcow2 $target_image $tag
-```
-
-### `just spawn-vm`
-
-Runs a virtual machine using systemd-vmspawn.
-
-```bash
-just spawn-vm rebuild="0" type="qcow2" ram="6G"
-```
-
-## File Management
-
-### `just check`
-
-Checks the syntax of all `.just` files and the `Justfile`.
-
-### `just fix`
-
-Fixes the syntax of all `.just` files and the `Justfile`.
-
-### `just clean`
-
-Cleans the repository by removing build artifacts.
-
-### `just lint`
-
-Runs shell check on all Bash scripts.
-
-### `just format`
-
-Runs shfmt on all Bash scripts.
-
-## Additional resources
-
-For additional driver support, ublue maintains a set of scripts and container images available at [ublue-akmod](https://github.com/ublue-os/akmods). These images include the necessary scripts to install multiple kernel drivers within the container (Nvidia, OpenRazer, Framework...). The documentation provides guidance on how to properly integrate these drivers into your container image.
-
-## Community Examples
-
-These are images derived from this template (or similar enough to this template). Reference them when building your image!
-
-- [m2Giles' OS](https://github.com/m2giles/m2os)
-- [bOS](https://github.com/bsherman/bos)
-- [Homer](https://github.com/bketelsen/homer/)
-- [Amy OS](https://github.com/astrovm/amyos)
-- [VeneOS](https://github.com/Venefilyn/veneos)
+For details on disk images, ArtifactHub, and the Justfile recipes, see the upstream [ublue-os/image-template README](https://github.com/ublue-os/image-template#readme).
