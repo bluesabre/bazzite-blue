@@ -28,13 +28,13 @@ systemctl enable podman.socket
 # /ctx/scripts/install-1password-edge.sh
 
 # Install Brave
-/ctx/scripts/install-brave.sh
+# /ctx/scripts/install-brave.sh
 
 # Install Vivaldi
 # /ctx/scripts/install-vivaldi.sh
 
 # Install virt-manager
-# /ctx/scripts/install-virt-manager.sh
+/ctx/scripts/install-virt-manager.sh
 
 # Install code
 /ctx/scripts/install-vscode.sh
