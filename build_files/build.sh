@@ -16,6 +16,9 @@ systemctl enable podman.socket
 # Fonts
 /ctx/scripts/install-fonts.sh
 
+# KDE Plasma defaults (theme, wallpaper, panel layout, app settings)
+/ctx/scripts/configure-kde-defaults.sh
+
 # 1Password (stable channel; pass "edge" for the beta channel)
 /ctx/scripts/install-1password.sh stable
 
