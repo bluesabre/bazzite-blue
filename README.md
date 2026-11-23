@@ -23,7 +23,9 @@ The image is rebuilt daily, so it picks up upstream Bazzite updates automaticall
 | Microsoft TrueType Core Fonts (`msttcore-fonts`) | [install-fonts.sh](/build_files/scripts/install-fonts.sh) | [kohega/bazzite-khg](https://github.com/kohega/bazzite-khg/blob/500f54715384a66a4c6756a1bc4a8160c82c6c37/build_files/install_packages.sh) |
 | Ubuntu Font Family (`fonts-ubuntu`) | [install-fonts.sh](/build_files/scripts/install-fonts.sh) | [rpassmore/my-ublue-os](https://github.com/rpassmore/my-ublue-os/blob/3fe0b5ce2a5a0b1d9c7565cbba2f8eacb9ab6551/build_files/build.sh) |
 | Virtual Machine Manager (`virt-manager`, libvirt/QEMU) | [install-virt-manager.sh](/build_files/scripts/install-virt-manager.sh) | [butterflysky/butterfly-ublue](https://github.com/butterflysky/butterfly-ublue/blob/c5f0adaa8fac85fbd0e0f8d53812697c047ffb14/build_files/install-addon-packages.sh) |
+| Incus (`incus`, `incus-agent`, `lxcfs`) | [install-incus.sh](/build_files/scripts/install-incus.sh) | _N/A_ |
 | Visual Studio Code (`code`) | [install-vscode.sh](/build_files/scripts/install-vscode.sh) | [ublue-os/bluefin](https://github.com/ublue-os/bluefin/blob/10d0ea03a94abff0d736fd3a320e61a9edc7833f/build_files/dx/00-dx.sh) |
+| Dev distroboxes (`gtk-dev`, `rust-dev`, `flutter-dev`) and `ujust` recipes | [install-dev-boxes.sh](/build_files/scripts/install-dev-boxes.sh), [dev.ini](/build_files/distrobox/dev.ini), [60-custom.just](/build_files/just/60-custom.just) | _N/A_ |
 | Optipng, flatpak-builder, Yakuake | [install-utilities.sh](/build_files/scripts/install-utilities.sh) | _N/A_ |
 | Signature verification policy for this image | [configure-signing.sh](/build_files/scripts/configure-signing.sh) | _N/A_ |
 | Stale-image desktop warning | [install-image-age-check.sh](/build_files/scripts/install-image-age-check.sh) | _N/A_ |
@@ -93,3 +95,26 @@ Under **Settings → Rules → Rulesets**, add a ruleset for `main` that require
 | [Justfile](./Justfile) | Local build, rechunk, VM, and lint recipes (`just --list`) |
 
 For details on disk images, ArtifactHub, and the Justfile recipes, see the upstream [ublue-os/image-template README](https://github.com/ublue-os/image-template#readme).
+
+### Incus
+
+Incus is installed and socket-activated. Run the one-time setup as your user, then reboot. Logging out of Plasma often keeps the session running, so the new group won't apply. To use Incus right away in one terminal, run `newgrp incus-admin`.
+
+```bash
+ujust setup-incus
+```
+
+This adds you to `incus-admin`, gives root subordinate ID ranges, runs `incus admin init --minimal` and trusts `incusbr0` in firewalld. It refuses to run if Bazzite's rootful `incus` distrobox exists, because both would use `/var/lib/incus`.
+
+### Development boxes
+
+Toolchains live in distroboxes rather than the image. Create one or all of them:
+
+```bash
+ujust setup-dev-box gtk-dev      # Fedora: GTK 3/4, libadwaita, Vala, Meson, PyGObject, Blueprint
+ujust setup-dev-box rust-dev     # Fedora: rustup (toolchain in ~/.cargo), GTK libs for gtk-rs
+ujust setup-dev-box flutter-dev  # Ubuntu: Flutter Linux desktop (SDK in ~/.local/share/flutter)
+ujust setup-dev-box              # all three
+```
+
+The definitions are in `/usr/share/bazzite-blue/distrobox/dev.ini`. To rebuild a box from scratch, run `distrobox assemble create --replace --file /usr/share/bazzite-blue/distrobox/dev.ini --name <box>`. To use VS Code with a box, use the Dev Containers extension's **Attach to Running Container** (with `dev.containers.dockerPath` set to `podman`).

@@ -29,8 +29,14 @@ systemctl enable podman.socket
 # Virtualization
 /ctx/scripts/install-virt-manager.sh
 
+# Incus (system containers and VMs; finish setup with `ujust setup-incus`)
+/ctx/scripts/install-incus.sh
+
 # Visual Studio Code
 /ctx/scripts/install-vscode.sh
+
+# Dev distrobox definitions and ujust recipes (`ujust setup-dev-box`)
+/ctx/scripts/install-dev-boxes.sh
 
 # Insync (optional)
 # /ctx/scripts/install-insync.sh
