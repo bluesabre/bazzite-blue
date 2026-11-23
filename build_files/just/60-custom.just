@@ -66,17 +66,17 @@ setup-incus:
       echo "Incus is ready."
     fi
 
-# Create Bazzite Blue dev distroboxes: gtk-dev, rust-dev, flutter-dev, ubuntu-pkg, or all
+# Create Bazzite Blue dev distroboxes: gtk-dev, rust-dev, flutter-dev, ubuntu-pkg, debian-pkg, or all
 [group("bazzite-blue")]
 setup-dev-box BOX="all":
     #!/usr/bin/bash
     set -euo pipefail
     ini=/usr/share/bazzite-blue/distrobox/dev.ini
     case "{{ BOX }}" in
-      all) boxes=(gtk-dev rust-dev flutter-dev ubuntu-pkg) ;;
-      gtk-dev|rust-dev|flutter-dev|ubuntu-pkg) boxes=("{{ BOX }}") ;;
+      all) boxes=(gtk-dev rust-dev flutter-dev ubuntu-pkg debian-pkg) ;;
+      gtk-dev|rust-dev|flutter-dev|ubuntu-pkg|debian-pkg) boxes=("{{ BOX }}") ;;
       *)
-        echo "Usage: ujust setup-dev-box [gtk-dev|rust-dev|flutter-dev|ubuntu-pkg|all]"
+        echo "Usage: ujust setup-dev-box [gtk-dev|rust-dev|flutter-dev|ubuntu-pkg|debian-pkg|all]"
         exit 1
         ;;
     esac
@@ -109,10 +109,10 @@ setup-dev-box BOX="all":
           echo "Add to ~/.bashrc to put flutter on PATH inside flutter-dev:"
           echo '  if [ "${CONTAINER_ID:-}" = flutter-dev ]; then export PATH="$HOME/.local/share/flutter/bin:$PATH"; fi'
           ;;
-        ubuntu-pkg)
+        ubuntu-pkg|debian-pkg)
           # First enter installs the packages and writes /etc/pbuilderrc.
-          distrobox enter ubuntu-pkg -- true
-          echo "Create a build chroot with: distrobox enter ubuntu-pkg -- pbuilder-dist <release> create"
+          distrobox enter "$box" -- true
+          echo "Create a build chroot with: distrobox enter $box -- pbuilder-dist <release> create"
           ;;
       esac
     done

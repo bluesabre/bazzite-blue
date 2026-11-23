@@ -25,7 +25,7 @@ The image is rebuilt daily, so it picks up upstream Bazzite updates automaticall
 | Virtual Machine Manager (`virt-manager`, libvirt/QEMU) | [install-virt-manager.sh](/build_files/scripts/install-virt-manager.sh) | [butterflysky/butterfly-ublue](https://github.com/butterflysky/butterfly-ublue/blob/c5f0adaa8fac85fbd0e0f8d53812697c047ffb14/build_files/install-addon-packages.sh) |
 | Incus (`incus`, `incus-agent`, `lxcfs`) | [install-incus.sh](/build_files/scripts/install-incus.sh) | _N/A_ |
 | Visual Studio Code (`code`) | [install-vscode.sh](/build_files/scripts/install-vscode.sh) | [ublue-os/bluefin](https://github.com/ublue-os/bluefin/blob/10d0ea03a94abff0d736fd3a320e61a9edc7833f/build_files/dx/00-dx.sh) |
-| Dev distroboxes (`gtk-dev`, `rust-dev`, `flutter-dev`, `ubuntu-pkg`) and `ujust` recipes | [install-dev-boxes.sh](/build_files/scripts/install-dev-boxes.sh), [dev.ini](/build_files/distrobox/dev.ini), [60-custom.just](/build_files/just/60-custom.just) | _N/A_ |
+| Dev distroboxes (`gtk-dev`, `rust-dev`, `flutter-dev`, `ubuntu-pkg`, `debian-pkg`) and `ujust` recipes | [install-dev-boxes.sh](/build_files/scripts/install-dev-boxes.sh), [dev.ini](/build_files/distrobox/dev.ini), [60-custom.just](/build_files/just/60-custom.just) | _N/A_ |
 | Optipng, flatpak-builder, Yakuake | [install-utilities.sh](/build_files/scripts/install-utilities.sh) | _N/A_ |
 | Signature verification policy for this image | [configure-signing.sh](/build_files/scripts/configure-signing.sh) | _N/A_ |
 | Stale-image desktop warning | [install-image-age-check.sh](/build_files/scripts/install-image-age-check.sh) | _N/A_ |
@@ -115,17 +115,18 @@ ujust setup-dev-box gtk-dev      # Fedora: GTK 3/4, libadwaita, Vala, Meson, PyG
 ujust setup-dev-box rust-dev     # Fedora: rustup (toolchain in ~/.cargo), GTK libs for gtk-rs
 ujust setup-dev-box flutter-dev  # Ubuntu: Flutter Linux desktop (SDK in ~/.local/share/flutter)
 ujust setup-dev-box ubuntu-pkg   # Ubuntu 26.10: pbuilder-dist, ubuntu-dev-tools, lintian, debuild
-ujust setup-dev-box              # all four
+ujust setup-dev-box debian-pkg   # Debian unstable: the same tools, for current Debian requirements
+ujust setup-dev-box              # all five
 ```
 
-`ubuntu-pkg` is set up so `pbuilder-dist` works in a rootless box. It has its own PID namespace, and its `/etc/pbuilderrc` skips `/sys` and bind-mounts real `/dev/null`, `/dev/zero` and friends into the chroot. Source repositories (`deb-src`) are enabled, so `apt-get source` and `sudo apt-get build-dep` work. Typical use:
+`ubuntu-pkg` and `debian-pkg` are set up so `pbuilder-dist` works in a rootless box. Each has its own PID namespace, and its `/etc/pbuilderrc` skips `/sys` and bind-mounts real `/dev/null`, `/dev/zero` and friends into the chroot. Source repositories (`deb-src`) are enabled, so `apt-get source` and `sudo apt-get build-dep` work. Typical use:
 
 ```bash
 distrobox enter ubuntu-pkg
-pbuilder-dist stonking create        # or resolute, sid, trixie, ...
+pbuilder-dist stonking create        # or resolute, sid, trixie, ... (either box can target either distro)
 pbuilder-dist stonking build foo_1.0-1.dsc
 ```
 
-Chroot tarballs in `~/pbuilder` belong to the box's root, which maps to a subordinate UID on the host, so delete them from inside the box with `sudo`. Build results are owned by you. The box is pinned to `ubuntu:26.10`; bump the tag in `dev.ini` when a newer release ships.
+Chroot tarballs in `~/pbuilder` belong to the box's root, which maps to a subordinate UID on the host, so delete them from inside the box with `sudo`. Build results are owned by you. `ubuntu-pkg` is pinned to `ubuntu:26.10`, so bump the tag in `dev.ini` when a newer release ships. `debian-pkg` tracks `debian:unstable` and picks up the latest image whenever it's recreated.
 
 The definitions are in `/usr/share/bazzite-blue/distrobox/dev.ini`. To rebuild a box from scratch, run `distrobox assemble create --replace --file /usr/share/bazzite-blue/distrobox/dev.ini --name <box>`. To use VS Code with a box, use the Dev Containers extension's **Attach to Running Container** (with `dev.containers.dockerPath` set to `podman`).
