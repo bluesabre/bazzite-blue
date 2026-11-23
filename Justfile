@@ -2,6 +2,9 @@ export image_name := env("IMAGE_NAME", "bazzite-blue") # output image name, usua
 export default_tag := env("DEFAULT_TAG", "latest")
 export bib_image := env("BIB_IMAGE", "quay.io/centos-bootc/bootc-image-builder:latest")
 
+# Disk image config: DISK_CONFIG, else the git-ignored disk_config/local.toml (e.g. a test user), else disk.toml
+export disk_config := env("DISK_CONFIG", if path_exists("disk_config/local.toml") == "true" { "disk_config/local.toml" } else { "disk_config/disk.toml" })
+
 alias build-vm := build-qcow2
 alias rebuild-vm := rebuild-qcow2
 alias run-vm := run-vm-qcow2
@@ -200,6 +203,7 @@ _build-bib $target_image $tag $type $config: (_rootful_load_image target_image t
     args+="--rootfs=btrfs"
 
     BUILDTMP=$(mktemp -p "${PWD}" -d -t _build-bib.XXXXXXXXXX)
+    echo "Using disk config: ${config}"
 
     sudo podman run \
       --rm \
@@ -216,7 +220,11 @@ _build-bib $target_image $tag $type $config: (_rootful_load_image target_image t
       "${target_image}:${tag}"
 
     mkdir -p output
-    sudo mv -f $BUILDTMP/* output/
+    # Replace previous results; mv can't overwrite a non-empty directory.
+    for item in "$BUILDTMP"/*; do
+      sudo rm -rf "output/$(basename "$item")"
+      sudo mv -f "$item" output/
+    done
     sudo rmdir $BUILDTMP
     sudo chown -R $USER:$USER output/
 
@@ -232,11 +240,11 @@ _rebuild-bib $target_image $tag $type $config: (build target_image tag) && (_bui
 
 # Build a QCOW2 virtual machine image
 [group('Build Virtal Machine Image')]
-build-qcow2 $target_image=("localhost/" + image_name) $tag=default_tag: && (_build-bib target_image tag "qcow2" "disk_config/disk.toml")
+build-qcow2 $target_image=("localhost/" + image_name) $tag=default_tag: && (_build-bib target_image tag "qcow2" disk_config)
 
 # Build a RAW virtual machine image
 [group('Build Virtal Machine Image')]
-build-raw $target_image=("localhost/" + image_name) $tag=default_tag: && (_build-bib target_image tag "raw" "disk_config/disk.toml")
+build-raw $target_image=("localhost/" + image_name) $tag=default_tag: && (_build-bib target_image tag "raw" disk_config)
 
 # Build an ISO virtual machine image
 [group('Build Virtal Machine Image')]
@@ -244,11 +252,11 @@ build-iso $target_image=("localhost/" + image_name) $tag=default_tag: && (_build
 
 # Rebuild a QCOW2 virtual machine image
 [group('Build Virtal Machine Image')]
-rebuild-qcow2 $target_image=("localhost/" + image_name) $tag=default_tag: && (_rebuild-bib target_image tag "qcow2" "disk_config/disk.toml")
+rebuild-qcow2 $target_image=("localhost/" + image_name) $tag=default_tag: && (_rebuild-bib target_image tag "qcow2" disk_config)
 
 # Rebuild a RAW virtual machine image
 [group('Build Virtal Machine Image')]
-rebuild-raw $target_image=("localhost/" + image_name) $tag=default_tag: && (_rebuild-bib target_image tag "raw" "disk_config/disk.toml")
+rebuild-raw $target_image=("localhost/" + image_name) $tag=default_tag: && (_rebuild-bib target_image tag "raw" disk_config)
 
 # Rebuild an ISO virtual machine image
 [group('Build Virtal Machine Image')]
@@ -287,7 +295,9 @@ _run-vm $target_image $tag $type $config:
     run_args+=(--env "RAM_SIZE=8G")
     run_args+=(--env "DISK_SIZE=64G")
     run_args+=(--env "TPM=Y")
-    run_args+=(--env "GPU=Y")
+    # qemux can't use NVIDIA GPUs (no NVIDIA EGL driver in the container);
+    # set VM_GPU=Y to opt in on Intel/AMD hosts.
+    run_args+=(--env "GPU=${VM_GPU:-N}")
     run_args+=(--device=/dev/kvm)
     run_args+=(--volume "${PWD}/${image_file}":"/boot.${type}")
     run_args+=(docker.io/qemux/qemu)
@@ -298,11 +308,11 @@ _run-vm $target_image $tag $type $config:
 
 # Run a virtual machine from a QCOW2 image
 [group('Run Virtal Machine')]
-run-vm-qcow2 $target_image=("localhost/" + image_name) $tag=default_tag: && (_run-vm target_image tag "qcow2" "disk_config/disk.toml")
+run-vm-qcow2 $target_image=("localhost/" + image_name) $tag=default_tag: && (_run-vm target_image tag "qcow2" disk_config)
 
 # Run a virtual machine from a RAW image
 [group('Run Virtal Machine')]
-run-vm-raw $target_image=("localhost/" + image_name) $tag=default_tag: && (_run-vm target_image tag "raw" "disk_config/disk.toml")
+run-vm-raw $target_image=("localhost/" + image_name) $tag=default_tag: && (_run-vm target_image tag "raw" disk_config)
 
 # Run a virtual machine from an ISO
 [group('Run Virtal Machine')]
