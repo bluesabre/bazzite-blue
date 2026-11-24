@@ -118,3 +118,32 @@ setup-dev-box BOX="all":
     done
 
     echo "Enter a box with: distrobox enter <name>"
+
+# Run Syncthing for the current user, starting at boot even without a login
+[group("bazzite-blue")]
+setup-syncthing:
+    #!/usr/bin/bash
+    set -euo pipefail
+    if [[ $(id -u) -eq 0 ]]; then
+      echo "Please run this as your user, not root."
+      exit 1
+    fi
+
+    systemctl --user enable --now syncthing.service
+
+    # Lingering starts the user manager (and syncthing) at boot, before login.
+    if [[ $(loginctl show-user "$USER" -p Linger --value 2>/dev/null) != yes ]]; then
+      echo "Enabling lingering for $USER"
+      sudo loginctl enable-linger "$USER"
+    fi
+
+    # Sync and local discovery ports, so peers can connect directly instead of via relays.
+    if systemctl is-active -q firewalld; then
+      if ! sudo firewall-cmd -q --permanent --query-service=syncthing; then
+        sudo firewall-cmd -q --permanent --add-service=syncthing
+        sudo firewall-cmd -q --reload
+      fi
+    fi
+
+    echo "Syncthing is running. Open http://127.0.0.1:8384 and set a GUI password."
+    echo "For a KDE tray icon: flatpak install flathub io.github.martchus.syncthingtray"
