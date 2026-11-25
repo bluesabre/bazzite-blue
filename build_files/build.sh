@@ -41,5 +41,8 @@ systemctl enable podman.socket
 # Insync (optional)
 # /ctx/scripts/install-insync.sh
 
+# Syncthing (opt in per user with `ujust setup-syncthing`)
+/ctx/scripts/install-syncthing.sh
+
 # Utilities
 /ctx/scripts/install-utilities.sh
